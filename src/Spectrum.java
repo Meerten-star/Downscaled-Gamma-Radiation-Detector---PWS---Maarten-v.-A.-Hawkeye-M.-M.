@@ -195,4 +195,13 @@ public class Spectrum {
     public ArrayList<Double> getCalibration() {
         return new ArrayList<>(Arrays.asList(startValue, stepValue));
     }
+
+    public int getUraniumCount() {
+        return 0;
+    }
+
+    public int getBismuthCount() {
+        return 0;
+    }
+
 }
