@@ -126,18 +126,10 @@ public class Spectrum {
         }
     }
 
-    public XSSFRow getOrElseCreateRow(XSSFSheet sheet, int rownum) {
-        XSSFRow row = sheet.getRow(rownum);
-        if (row == null) {
-            row = sheet.createRow(rownum);
-        }
-        return row;
-    }
-
     public void writeDataColumn(XSSFSheet sheet) throws IndexOutOfBoundsException {
 
         // Header
-        XSSFRow row = getOrElseCreateRow(sheet, 0);
+        XSSFRow row = ExportMain.getOrElseCreateRow(sheet, 0);
         Cell header = row.createCell(fileNo + 2);
         header.setCellValue(fileName);
 
@@ -157,7 +149,7 @@ public class Spectrum {
 
         // Data
         for (int rowIndex = dataStartRowIndex; rowIndex < countsList.size() + dataStartRowIndex; rowIndex++) {
-            Cell dataCell = getOrElseCreateRow(sheet, rowIndex).createCell(fileNo + 2);
+            Cell dataCell = ExportMain.getOrElseCreateRow(sheet, rowIndex).createCell(fileNo + 2);
             dataCell.setCellValue(countsList.get(rowIndex - dataStartRowIndex));
         }
     }

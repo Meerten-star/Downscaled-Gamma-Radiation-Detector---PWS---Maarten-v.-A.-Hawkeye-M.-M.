@@ -1,16 +1,20 @@
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.*;
 import java.util.*;
 
 public class ExportMain {
+    static List<String> yes_types = new ArrayList<>(Arrays.asList("yes", "ja", "yea", "yeah", "Absolutely!", "ye", "y",  "Undoubtedly", "da", "si", "oui"));
+
     static File[] source_files = new File("C:/Users/12687/OneDrive - Atheneum College Hageveld/PWS/Appendix/" +
             "Spectra").listFiles();
     static String outputFileName = "Spectra Graphs.xlsx";
     static File output_file = new File("C:/Users/12687/OneDrive - Atheneum College Hageveld/PWS/Appendix/" +
             "Spectra/" + outputFileName);
 
-    static XSSFWorkbook workbook = new XSSFWorkbook();
+    static XSSFWorkbook workbook;
     static Scanner requestScanner = new Scanner(System.in);
 
 
@@ -24,6 +28,12 @@ public class ExportMain {
             }
         }
 
+        try {
+            workbook = new XSSFWorkbook(new FileInputStream(output_file));
+        } catch (FileNotFoundException e) {
+            workbook = new XSSFWorkbook();
+        }
+
 
         System.out.println("""
                             Which sheet(s) would you like to update?
@@ -33,8 +43,17 @@ public class ExportMain {
             case "0" -> { // all
                 for (File[] data_files : directories) {
                     String directoryName = directory_names.get(directories.indexOf(data_files));
-                    ExcelSheet sheet = new ExcelSheet(workbook, data_files, directoryName);
-                    writeToSheet(sheet);
+                    XSSFSheet sheetCheck = workbook.getSheet("Data of " + directoryName);
+                    boolean writeSheetBoolean;
+                    if (sheetCheck != null) {
+                        writeSheetBoolean = requestConfirmation(directoryName);
+                    } else {
+                        writeSheetBoolean = true;
+                    }
+                    if (writeSheetBoolean) {
+                        ExcelSheet sheet = new ExcelSheet(workbook, data_files, directoryName);
+                        writeToSheet(sheet);
+                    }
                 }
             }
             case "1" -> {
@@ -87,6 +106,29 @@ public class ExportMain {
         sheet.writeChannelEnergy();
         sheet.writeData();
         sheet.sizeColumns();
+    }
+
+
+    static XSSFRow getOrElseCreateRow(XSSFSheet sheet, int rownum) {
+        XSSFRow row = sheet.getRow(rownum);
+        if (row == null) {
+            row = sheet.createRow(rownum);
+        }
+        return row;
+    }
+
+    static boolean requestConfirmation(String sheetName) {
+        System.out.println("The program will replace the sheet with the name: Data of " + sheetName);
+        System.out.println("Are you sure you want to proceed?");
+        Scanner requestScanner = new Scanner(System.in);
+        String response = requestScanner.nextLine();
+        if (yes_types.contains(response)) {
+            return true;
+        } else {
+            System.out.println("The sheet will not be replaced.");
+            return false;
+        }
+
     }
 
 }
