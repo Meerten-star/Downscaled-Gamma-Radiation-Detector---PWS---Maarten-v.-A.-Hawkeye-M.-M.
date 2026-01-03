@@ -1,0 +1,8 @@
+Th-234 at emission of 92.6 keV (5.2%).
+Selection from channel 33 (27.011620839516183 keV) to channel 133 (129.46275419516127 keV).
+Activity = 109.5357295885 cps.
+
+Bi-214 at emission of 609.3 keV (45.2%).
+Selection from channel 555 (562.5516361076614 keV) to channel 642 (651.0321603693549 keV).
+Activity = 3.150363904094027 cps.
+

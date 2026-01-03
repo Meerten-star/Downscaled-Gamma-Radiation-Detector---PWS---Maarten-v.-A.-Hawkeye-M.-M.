@@ -37,7 +37,7 @@ public class ExportMain {
 
         System.out.println("""
                             Which sheet(s) would you like to update?
-                               (0) All   (1) New day   (a-z) Specific""");
+                               (0) All   (1) New day   (a-z) Specific   (2) Age determination""");
         String response = requestScanner.nextLine();
         switch (response) {
             case "0" -> { // all
@@ -61,6 +61,9 @@ public class ExportMain {
                 String directoryName = directory_names.getLast();
                 ExcelSheet sheet = new ExcelSheet(workbook, data_files, directoryName);
                 writeToSheet(sheet);
+            }
+            case "2" -> {
+                ;
             }
             default -> {
                 int sheetIndex = stringToIndex(response, directories.size() - 1);
