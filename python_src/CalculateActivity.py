@@ -74,15 +74,17 @@ def getSelectionCPS(info, data, selectionDomain): # in channel space
 # Efficiency of the detector, constant (since we do not know the exact values)
 detectorEfficiency = 0.10
 
-sourceType = "Autunite"
+sourceType = "Autunite" # Contains natural Uranium
 if sourceType == "Autunite":
     sourceFile = "C:/Users/12687/OneDrive - Atheneum College Hageveld/PWS/Appendix/Spectra/Day 2 - October 1st/Erts.spe"
-    # Thorium-234, Bismuth-214
+
+    # Multiple emission per isotope to increase accuracy
     emissionPeaks = [("Th-234", 63.28, None), ("Th-234", 92.6, 5.2), ("Th-234", "63-93", None),
                      ("U-235", 143.76, None), ("U-235", 185.72, None), # with Ra-226, action?
                      ("Pb-214", 242, None), ("Pb-214", 295.22, None), ("Pb-214", 351.93, None),
-                     ("Bi-214", 609.3, 45.2)] # [(isotope_name, energy_of_emission_peak, fraction_of_activity_in_percentages), (...), ...]
+                     ("Bi-214", 609.3, 45.2)] # [(isotope_name (str), energy_of_emission_peak (str/double), fraction_of_activity_in_percentages (double)), (...), ...]
 
+    # Erases the peak when not yet added
     emissionPeaks = [peak for peak in emissionPeaks if peak[2] is not None]
 
 else:
@@ -112,14 +114,14 @@ for i in range(len(emissionPeaks)):
     activity = measuredActivity / detectorEfficiency
     activityPerIsotope.append((emissionPeaks[i], selectionDomain, activity))
 
-
+# To string
 def activityListToString(IsotopeActivity):
     isotopeInfo, selectionDomain, activity = IsotopeActivity
     return (f"{isotopeInfo[0]} at emission of {isotopeInfo[1]} keV ({isotopeInfo[2]}%)."
             f"\nSelection from channel {energyToChannel(infoList, selectionDomain[0])} ({selectionDomain[0]} keV) to channel {energyToChannel(infoList, selectionDomain[1])} ({selectionDomain[1]} keV)."
             f"\nActivity = {activity} cps.\n\n")
 
-
+# output
 response = input("File selections.txt wil be overridden. Do you want to proceed?\n")
 if response.lower().startswith("y"):
     print("Writing to selections.txt ...")
