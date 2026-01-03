@@ -1,7 +1,5 @@
 import matplotlib.pyplot as plt
 from matplotlib.widgets import SpanSelector
-import math
-from decimal import Decimal
 
 
 def getSpectrum(file):
@@ -78,10 +76,10 @@ sourceType = "Autunite" # Contains natural Uranium
 if sourceType == "Autunite":
     sourceFile = "C:/Users/12687/OneDrive - Atheneum College Hageveld/PWS/Appendix/Spectra/Day 2 - October 1st/Erts.spe"
 
-    # Multiple emission per isotope to increase accuracy
-    emissionPeaks = [("Th-234", 63.28, None), ("Th-234", 92.6, 5.2), ("Th-234", "63-93", None),
-                     ("U-235", 143.76, None), ("U-235", 185.72, None), # with Ra-226, action?
-                     ("Pb-214", 242, None), ("Pb-214", 295.22, None), ("Pb-214", 351.93, None),
+    # Multiple emission per isotope to increase accuracy. Source: https://nds.iaea.org/records/nfcbt-q6e23, page 36+
+    emissionPeaks = [("Th-234", 63.3, 3.7), ("Th-234", 92.6, 5.2), ("Th-234", "63-93", 8.9), # 112.8, 0.24% (not easily visible)
+                     ("U-235", 143.76, 11.0), ("U-235", 185.72, 57.2), # last with Ra-226 (186.2), decay of U-238, action?.
+                     ("Pb-214", 242.0, 7.2), ("Pb-214", 295.22, 18.3), ("Pb-214", 351.93, 35.3),
                      ("Bi-214", 609.3, 45.2)] # [(isotope_name (str), energy_of_emission_peak (str/double), fraction_of_activity_in_percentages (double)), (...), ...]
 
     # Erases the peak when not yet added
@@ -125,11 +123,14 @@ def activityListToString(IsotopeActivity):
 response = input("File selections.txt wil be overridden. Do you want to proceed?\n")
 if response.lower().startswith("y"):
     print("Writing to selections.txt ...")
+
+    # Output to text file
     file = open("selections.txt", "w")
     for IsotopeActivity in activityPerIsotope:
         file.write(activityListToString(IsotopeActivity))
 else:
-    print("File selections.txt wil not be overridden.")
-    print(activityPerIsotope)
+    print("File selections.txt wil not be overridden.\n")
+
+    # Output to terminal
     for IsotopeActivity in activityPerIsotope:
         print(activityListToString(IsotopeActivity))

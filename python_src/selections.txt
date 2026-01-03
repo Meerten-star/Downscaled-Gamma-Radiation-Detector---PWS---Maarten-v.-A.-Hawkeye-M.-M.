@@ -1,8 +1,36 @@
+Th-234 at emission of 63.3 keV (3.7%).
+Selection from channel 68 (62.218945766585165 keV) to channel 72 (66.49266767784269 keV).
+Activity = 382.5914116151583 cps.
+
 Th-234 at emission of 92.6 keV (5.2%).
-Selection from channel 33 (27.011620839516183 keV) to channel 133 (129.46275419516127 keV).
-Activity = 109.5357295885 cps.
+Selection from channel 94 (89.61902938978452 keV) to channel 106 (102.04922346080049 keV).
+Activity = 504.1865200176545 cps.
+
+Th-234 at emission of 63-93 keV (8.9%).
+Selection from channel 58 (52.62440417842744 keV) to channel 119 (114.70348168461565 keV).
+Activity = 124.23219562053276 cps.
+
+U-235 at emission of 143.76 keV (11.0%).
+Selection from channel 133 (129.0069406613771 keV) to channel 161 (158.42281406256618 keV).
+Activity = 102.0380967610519 cps.
+
+U-235 at emission of 185.72 keV (57.2%).
+Selection from channel 176 (173.4682193545355 keV) to channel 209 (206.79719894168818 keV).
+Activity = 19.47627277442581 cps.
+
+Pb-214 at emission of 242.0 keV (7.2%).
+Selection from channel 218 (216.44106242524708 keV) to channel 273 (272.7741636105359 keV).
+Activity = 131.46077350123085 cps.
+
+Pb-214 at emission of 295.22 keV (18.3%).
+Selection from channel 269 (268.6618472240098 keV) to channel 323 (324.3752842962604 keV).
+Activity = 44.85648328375089 cps.
+
+Pb-214 at emission of 351.93 keV (35.3%).
+Selection from channel 323 (324.009119138556 keV) to channel 384 (386.70786075778244 keV).
+Activity = 17.79658995980462 cps.
 
 Bi-214 at emission of 609.3 keV (45.2%).
-Selection from channel 555 (562.5516361076614 keV) to channel 642 (651.0321603693549 keV).
-Activity = 3.150363904094027 cps.
+Selection from channel 546 (552.4867886958898 keV) to channel 649 (658.4305743250229 keV).
+Activity = 3.520994951634501 cps.
 
