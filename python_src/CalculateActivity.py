@@ -26,6 +26,15 @@ def getSpectrum(file):
     file.close()
     return info, data
 
+def subtractBackground(sourceInfo, sourceData):
+    backgroundInfo, backgroundData = getSpectrum("Spectra/EstimatedBackgroundSpectrum.spe")
+    timeFactor = sourceInfo[0] / backgroundInfo[0] # liveTime
+    data = []
+    for i in range(len(sourceData)):
+        data.append(sourceData[i] - backgroundData[i] * timeFactor)
+    return data
+
+
 def displayAndSelect(info, data):
     class Selection:
         def __init__(self):
@@ -34,6 +43,7 @@ def displayAndSelect(info, data):
         def onSelect(self, xMin, xMax):
             self.selectionDomain = (xMin, xMax)
             print(f"Selection: {xMin} - {xMax}")
+
 
     startValue, stepValue = info[2:]
     x = [i * stepValue + startValue for i in range(len(data))]
@@ -69,12 +79,15 @@ def getSelectionCPS(info, data, selectionDomain): # in channel space
     totalCPS = totalCounts / info[0]
     return totalCPS
 
+def recalculateFileSelectionsCPS():
+    pass
+
 # Efficiency of the detector, constant (since we do not know the exact values)
 detectorEfficiency = 0.10
 
 sourceType = "Autunite" # Contains natural Uranium
 if sourceType == "Autunite":
-    sourceFile = "C:/Users/12687/OneDrive - Atheneum College Hageveld/PWS/Appendix/Spectra/Day 2 - October 1st/Erts.spe"
+    sourceFile = "Spectra/AutuniteSpectrum.spe"
 
     # Multiple emission per isotope to increase accuracy. Source: https://nds.iaea.org/records/nfcbt-q6e23, page 36+
     emissionPeaks = [("Th-234", 63.3, 3.7), ("Th-234", 92.6, 5.2), ("Th-234", "63-93", 8.9), # 112.8, 0.24% (not easily visible)
@@ -94,6 +107,9 @@ else:
 
 # Get the spectrum
 infoList, dataList = getSpectrum(sourceFile)
+# sub plot
+
+dataList = subtractBackground(infoList, dataList)
 
 activityPerIsotope = []
 for i in range(len(emissionPeaks)):
