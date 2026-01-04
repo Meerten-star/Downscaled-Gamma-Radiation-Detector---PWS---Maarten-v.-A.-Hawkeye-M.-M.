@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 from matplotlib.widgets import SpanSelector
+import numpy as np
 
 
 def getSpectrum(file):
@@ -31,11 +32,14 @@ def subtractBackground(sourceInfo, sourceData):
     timeFactor = sourceInfo[0] / backgroundInfo[0] # liveTime
     data = []
     for i in range(len(sourceData)):
-        data.append(sourceData[i] - backgroundData[i] * timeFactor)
+        dataPoint = sourceData[i] - backgroundData[i] * timeFactor
+        if dataPoint < 0:
+            dataPoint = 0
+        data.append(dataPoint)
     return data
 
 
-def displayAndSelect(info, data):
+def displayAndSelect(info, data, data_notSub):
     class Selection:
         def __init__(self):
             self.selectionDomain = ()
@@ -44,14 +48,26 @@ def displayAndSelect(info, data):
             self.selectionDomain = (xMin, xMax)
             print(f"Selection: {xMin} - {xMax}")
 
+    fig, ax = plt.subplots()
 
+    # Spectrum data
     startValue, stepValue = info[2:]
     x = [i * stepValue + startValue for i in range(len(data))]
-    y = data
+    y = data_notSub
 
-    # make plot
-    fig, ax = plt.subplots()
+    # Background data
+    bground_info, bground_data = getSpectrum("Spectra/EstimatedBackgroundSpectrum.spe")
+    bground_startValue, bground_stepValue = bground_info[2:]
+    x_bground = [i * bground_stepValue + bground_startValue for i in range(len(bground_data))]
+    y_bground = bground_data
+
+    # Background subtracted spectrum data
+    y_sub = data
+
+    # make plots
     ax.plot(x, y)
+    ax.plot(x_bground, y_bground)
+    ax.plot(x, y_sub)
 
     # define selection
     selector = Selection()
@@ -79,8 +95,61 @@ def getSelectionCPS(info, data, selectionDomain): # in channel space
     totalCPS = totalCounts / info[0]
     return totalCPS
 
+
 def recalculateFileSelectionsCPS():
-    pass
+    selectionDomains = []
+    file = open("selections.txt", "r")
+    for line in file:
+        if "Selection from" in line:
+            splitLine = line.strip().split()
+            xMin = float(splitLine[4][1:-1])
+            xMax = float(splitLine[9][1:])
+            selectionDomains.append((xMin, xMax))
+    return selectionDomains
+
+
+def getActivityPerIsotope(request, infoList, dataList, dataList_notSubtracted, emissionPeaks, detectorEfficiency):
+    activityPerIsotope = []
+
+    n = len(emissionPeaks)
+    if request == "recalculate":
+        selectionDomains = recalculateFileSelectionsCPS()
+        if n != len(selectionDomains):
+            n = len(selectionDomains)
+            print("warning, no consistent peak attribution")
+
+    for i in range(n):
+        if request == "new selection":
+            print(f"Select peak {i + 1}/{n} at: {emissionPeaks[i][1]} keV of isotope {emissionPeaks[i][0]}")
+
+            # Let the user make a selection (shows spectrum + background)
+            selectionDomain = displayAndSelect(infoList, dataList, dataList_notSubtracted)
+
+        elif request == "recalculate":
+            selectionDomain = selectionDomains[i]
+        else:
+            print("warning, not a valid request")
+
+        # Get total counts per second of the selection
+        selectionCPS = getSelectionCPS(infoList, dataList, selectionDomain)
+
+        # Get the measured activity of the source by dividing by the chance this emission occurs
+        measuredActivity = 100 * selectionCPS / (emissionPeaks[i][2] ) # 100 because the given fraction is in percentages
+
+        # Actual predicted activity of the source by correcting for the efficiency of the detector
+        activity = measuredActivity / detectorEfficiency
+        activityPerIsotope.append((emissionPeaks[i], selectionDomain, activity))
+    return activityPerIsotope
+
+
+def activityListToString(IsotopeActivity):
+    isotopeInfo, selectionDomain, activity = IsotopeActivity
+    return (f"{isotopeInfo[0]} at emission of {isotopeInfo[1]} keV ({isotopeInfo[2]}%)."
+            f"\nSelection from channel {energyToChannel(infoList, selectionDomain[0])} ({selectionDomain[0]} keV) to channel {energyToChannel(infoList, selectionDomain[1])} ({selectionDomain[1]} keV)."
+            f"\nActivity = {activity} cps.\n\n")
+
+
+## Hardcoded constants
 
 # Efficiency of the detector, constant (since we do not know the exact values)
 detectorEfficiency = 0.10
@@ -106,42 +175,24 @@ else:
 ## Execution
 
 # Get the spectrum
-infoList, dataList = getSpectrum(sourceFile)
-# sub plot
+infoList, dataList_notSubtracted = getSpectrum(sourceFile)
 
-dataList = subtractBackground(infoList, dataList)
+# Subtract the background radiation
+dataList = subtractBackground(infoList, dataList_notSubtracted)
 
-activityPerIsotope = []
-for i in range(len(emissionPeaks)):
-    print(f"Select peak {i + 1}/{len(emissionPeaks)} at: {emissionPeaks[i][1]} keV of isotope {emissionPeaks[i][0]}")
+request = "recalculate" # "new selection" (default) || "recalculate"
+activityPerIsotope = getActivityPerIsotope(request, infoList, dataList, dataList_notSubtracted, emissionPeaks, detectorEfficiency)
 
-    # Let the user make a selection
-    selectionDomain = displayAndSelect(infoList, dataList)
-
-    # Get total counts per second of the selection
-    selectionCPS = getSelectionCPS(infoList, dataList, selectionDomain)
-
-    # Get the measured activity of the source by dividing by the chance this emission occurs
-    measuredActivity = 100 * selectionCPS / (emissionPeaks[i][2] ) # 100 because the given fraction is in percentages
-
-    # Actual predicted activity of the source by correcting for the efficiency of the detector
-    activity = measuredActivity / detectorEfficiency
-    activityPerIsotope.append((emissionPeaks[i], selectionDomain, activity))
-
-# To string
-def activityListToString(IsotopeActivity):
-    isotopeInfo, selectionDomain, activity = IsotopeActivity
-    return (f"{isotopeInfo[0]} at emission of {isotopeInfo[1]} keV ({isotopeInfo[2]}%)."
-            f"\nSelection from channel {energyToChannel(infoList, selectionDomain[0])} ({selectionDomain[0]} keV) to channel {energyToChannel(infoList, selectionDomain[1])} ({selectionDomain[1]} keV)."
-            f"\nActivity = {activity} cps.\n\n")
 
 # output
 response = input("File selections.txt wil be overridden. Do you want to proceed?\n")
 if response.lower().startswith("y"):
-    print("Writing to selections.txt ...")
+    filePath = "selections2.txt"
+
+    print(f"Writing to {filePath} ...")
 
     # Output to text file
-    file = open("selections.txt", "w")
+    file = open(filePath, "w")
     for IsotopeActivity in activityPerIsotope:
         file.write(activityListToString(IsotopeActivity))
 else:
